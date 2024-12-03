@@ -4,7 +4,6 @@ import { TextField, Button, Typography, Box, Container, CircularProgress } from 
 
 interface LoginFormData {
   username: string;
-  password: string;
 }
 
 const LoginPage = () => {
@@ -12,26 +11,33 @@ const LoginPage = () => {
 
   const [formData, setFormData] = useState<LoginFormData>({
     username: '',
-    password: '',
   });
+
+  const [password, setPassword] = useState<string>(''); // Handle password separately
   const [error, setError] = useState<string>(''); 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    if (name === 'password') {
+      setPassword(value); // Handle password separately
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+    setIsLoading(true);
 
-    if (!formData.username || !formData.password) {
-      setError('Username and Password are required');
+    // Validate inputs
+    if (!formData.username || !password) {
+      setError('Username and Password are required.');
       setIsLoading(false);
       return;
     }
@@ -42,7 +48,7 @@ const LoginPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, password }), // Include password securely in the request body
       });
 
       const data = await res.json();
@@ -50,10 +56,10 @@ const LoginPage = () => {
       if (res.ok) {
         router.push('/dashboard');
       } else {
-        setError(data.message || 'Login failed');
+        setError(data.message || 'Login failed.');
       }
     } catch (error) {
-      setError('An error occurred while logging in');
+      setError('An error occurred while logging in.');
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +67,17 @@ const LoginPage = () => {
 
   return (
     <Container maxWidth="xs">
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, backgroundColor: '#121212', padding: 4, borderRadius: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: 8,
+          backgroundColor: '#121212',
+          padding: 4,
+          borderRadius: 2,
+        }}
+      >
         <Typography variant="h5" sx={{ marginBottom: 2, color: 'white' }}>
           Login
         </Typography>
@@ -76,12 +92,11 @@ const LoginPage = () => {
             onChange={handleChange}
             sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
             InputLabelProps={{
-              style: { color: '#fff' }
+              style: { color: '#fff' },
             }}
             InputProps={{
-              style: { color: 'white' }, // White text color
+              style: { color: 'white' },
               placeholder: 'Enter your username',
-              
             }}
           />
           <TextField
@@ -90,16 +105,15 @@ const LoginPage = () => {
             type="password"
             variant="outlined"
             fullWidth
-            value={formData.password}
+            value={password}
             onChange={handleChange}
             sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
             InputLabelProps={{
-              style: { color: '#fff' }
+              style: { color: '#fff' },
             }}
             InputProps={{
-              style: { color: 'white' }, // White text color
+              style: { color: 'white' },
               placeholder: 'Enter your password',
-              
             }}
           />
 
