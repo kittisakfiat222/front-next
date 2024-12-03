@@ -9,38 +9,44 @@ interface RegisterFormData {
   email: string;
   tel: string;
   avatar: string;
-  password: string;
+  password?: string; // Optional field to avoid unnecessary handling in state
 }
 
 const RegisterPage = () => {
   const router = useRouter();
 
-  const [formData, setFormData] = useState<RegisterFormData>({
+  const [formData, setFormData] = useState<Omit<RegisterFormData, 'password'>>({
     username: '',
     fname: '',
     lname: '',
     email: '',
     tel: '',
     avatar: '',
-    password: '',
   });
 
+  const [password, setPassword] = useState<string>(''); // Handle password separately
   const [error, setError] = useState<string>(''); 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+    if (name === 'password') {
+      setPassword(value); // Handle password separately
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+    setIsLoading(true);
 
+    // Validate fields
     if (
       !formData.username ||
       !formData.fname ||
@@ -48,9 +54,16 @@ const RegisterPage = () => {
       !formData.email ||
       !formData.tel ||
       !formData.avatar ||
-      !formData.password
+      !password
     ) {
-      setError('All fields are required');
+      setError('All fields are required.');
+      setIsLoading(false);
+      return;
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long.');
       setIsLoading(false);
       return;
     }
@@ -61,7 +74,7 @@ const RegisterPage = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, password }), // Include password in submission
       });
 
       const data = await res.json();
@@ -69,10 +82,10 @@ const RegisterPage = () => {
       if (res.ok) {
         router.push('/login');
       } else {
-        setError(data.message || 'Registration failed');
+        setError(data.message || 'Registration failed.');
       }
     } catch (error) {
-      setError('An error occurred while registering');
+      setError('An error occurred while registering.');
     } finally {
       setIsLoading(false);
     }
@@ -80,132 +93,52 @@ const RegisterPage = () => {
 
   return (
     <Container maxWidth="xs">
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: 8, backgroundColor: '#121212', padding: 4, borderRadius: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: 8,
+          backgroundColor: '#121212',
+          padding: 4,
+          borderRadius: 2,
+        }}
+      >
         <Typography variant="h5" sx={{ marginBottom: 2, color: 'white' }}>
           Register
         </Typography>
 
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
-          <TextField
-            label="Username"
-            name="username"
-            variant="outlined"
-            fullWidth
-            value={formData.username}
-            onChange={handleChange}
-            sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
-            InputProps={{
-              style: { color: 'white' }, // White text color
-              placeholder: 'Enter your username',
-              
-            }}
-          />
-          <TextField
-            label="First Name"
-            name="fname"
-            variant="outlined"
-            fullWidth
-            value={formData.fname}
-            onChange={handleChange}
-            sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
-            InputProps={{
-              style: { color: 'white' }, // White text color
-              placeholder: 'Enter your first name',
-              
-            }}
-          />
-          <TextField
-            label="Last Name"
-            name="lname"
-            variant="outlined"
-            fullWidth
-            value={formData.lname}
-            onChange={handleChange}
-            sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
-            InputProps={{
-              style: { color: 'white' }, // White text color
-              placeholder: 'Enter your last name',
-              
-            }}
-          />
-          <TextField
-            label="Email"
-            name="email"
-            type="email"
-            variant="outlined"
-            fullWidth
-            value={formData.email}
-            onChange={handleChange}
-            sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
-            InputProps={{
-              style: { color: 'white' }, // White text color
-              placeholder: 'Enter your email',
-              
-            }}
-          />
-          <TextField
-            label="Phone"
-            name="tel"
-            type="tel"
-            variant="outlined"
-            fullWidth
-            value={formData.tel}
-            onChange={handleChange}
-            sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
-            InputProps={{
-              style: { color: 'white' }, // White text color
-              placeholder: 'Enter your phone number',
-              
-            }}
-          />
-          <TextField
-            label="Avatar URL"
-            name="avatar"
-            variant="outlined"
-            fullWidth
-            value={formData.avatar}
-            onChange={handleChange}
-            sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
-            InputProps={{
-              style: { color: 'white' }, // White text color
-              placeholder: 'Enter avatar URL',
-              
-            }}
-          />
+          {['username', 'fname', 'lname', 'email', 'tel', 'avatar'].map((field) => (
+            <TextField
+              key={field}
+              label={field.charAt(0).toUpperCase() + field.slice(1)}
+              name={field}
+              variant="outlined"
+              fullWidth
+              value={formData[field as keyof Omit<RegisterFormData, 'password'>]}
+              onChange={handleChange}
+              sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
+              InputLabelProps={{ style: { color: '#fff' } }}
+              InputProps={{
+                style: { color: 'white' },
+                placeholder: `Enter your ${field}`,
+              }}
+            />
+          ))}
           <TextField
             label="Password"
             name="password"
             type="password"
             variant="outlined"
             fullWidth
-            value={formData.password}
+            value={password}
             onChange={handleChange}
             sx={{ marginBottom: 2, backgroundColor: '#333', color: 'white' }}
-            InputLabelProps={{
-              style: { color: '#fff' }
-            }}
+            InputLabelProps={{ style: { color: '#fff' } }}
             InputProps={{
-              style: { color: 'white' }, // White text color
+              style: { color: 'white' },
               placeholder: 'Enter your password',
-              
             }}
           />
 
