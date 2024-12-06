@@ -37,7 +37,7 @@ export default function Dashboard() {
   const [productReports, setProductReports] = useState<ProductReport[]>([]);
   const [categoryReports, setCategoryReports] = useState<CategoryReport[]>([]);
   const [summary, setSummary] = useState<SummaryReport | null>(null);
-  const [userAll, setUserAll] = useState<DashboardProps | null>(null);
+  const [userAll, setUserAll] = useState<DashboardProps | null>(null);  // Ensure userAll is null initially
   const [userData, setUserData] = useState<any>(null);  // Store resolved data
 
   const token = getCookie('token');
@@ -54,7 +54,8 @@ export default function Dashboard() {
         });
         if (!userRes.ok) {
           console.error('Error fetching user data');
-          router.push('/login')
+          router.push('/login');
+          return;
         }
         const userData = await userRes.json();
         setUserData(userData.user);
@@ -80,7 +81,7 @@ export default function Dashboard() {
         setProductReports(productData || []);
         setCategoryReports(categoryData || []);
         setSummary(summaryData || null);
-        setUserAll(userAllData || []);
+        setUserAll(userAllData || { users: [] });  // Set default structure for userAll
       } catch (error) {
         console.error('Error fetching data:', error);
         router.push('/login');  // Redirect if any fetch fails
@@ -186,7 +187,7 @@ export default function Dashboard() {
                 <TableBody>
                   {productReports.map((product) => (
                     <TableRow key={product.id}>
-                      <TableCell>{product.product.name}</TableCell>
+                      <TableCell>{product.name}</TableCell>
                       <TableCell>฿{product.totalSales.toFixed(2)}</TableCell>
                       <TableCell>{product.totalQuantity}</TableCell>
                     </TableRow>
@@ -246,9 +247,9 @@ export default function Dashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {userAll?.users.map((user , index) => (
+              {userAll?.users.map((user, index) => (
                 <TableRow key={index}>
-                  <TableCell>{index+1}</TableCell>
+                  <TableCell>{index + 1}</TableCell>
                   <TableCell>{`${user.fname} ${user.lname}`}</TableCell>
                   <TableCell>{user.username}</TableCell>
                   <TableCell>{user.email}</TableCell>
