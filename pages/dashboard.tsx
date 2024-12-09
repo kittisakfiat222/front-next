@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import { CircularProgress, Grid, Paper, Typography, Box, Table, TableHead, TableRow, TableCell, TableBody } from '@mui/material';
+import {
+  CircularProgress,
+  Grid,
+  Paper,
+  Typography,
+  Box,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableBody,
+} from '@mui/material';
 import Layout from '@/component/Layout';
-import { GetServerSideProps } from 'next';
 import type { User } from '../models/user';
-import { setCookie, getCookie, deleteCookie } from '@/utils/cookie';
-
-interface DashboardProps {
-  userAll: {
-    users: User[];
-  };
-}
+import { getCookie } from '@/utils/cookie';
 
 interface ProductReport {
   id: number;
@@ -31,14 +35,18 @@ interface SummaryReport {
   allTime: { totalSales: number; orderCount: number };
 }
 
+interface UserAll {
+  users: User[];
+}
+
 export default function Dashboard() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [productReports, setProductReports] = useState<ProductReport[]>([]);
   const [categoryReports, setCategoryReports] = useState<CategoryReport[]>([]);
   const [summary, setSummary] = useState<SummaryReport | null>(null);
-  const [userAll, setUserAll] = useState<DashboardProps | null>(null);  // Ensure userAll is null initially
-  const [userData, setUserData] = useState<any>(null);  // Store resolved data
+  const [userAll, setUserAll] = useState<UserAll | null>(null);
+  const [userData, setUserData] = useState<any>(null);
 
   const token = getCookie('token');
 
@@ -46,45 +54,58 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
 
+      if (!token) {
+        console.error('No token found. Redirecting to login.');
+        router.push('/login');
+        return;
+      }
+
       try {
         // Fetch protected user data
         const userRes = await fetch('/api/protected', {
           method: 'GET',
-          credentials: 'same-origin', 
+          credentials: 'same-origin',
         });
+
         if (!userRes.ok) {
-          console.error('Error fetching user data');
+          console.error('Error fetching user data:', userRes.statusText);
           router.push('/login');
           return;
         }
+
         const userData = await userRes.json();
         setUserData(userData.user);
 
         // Fetch reports and users
         const responses = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/top-products`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/top-categories`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/summary`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
 
-        const [productData, categoryData, summaryData, userAllData] = await Promise.all(responses.map((res) => res.json()));
+        const [productData, categoryData, summaryData, userAllData] = await Promise.all(
+          responses.map((res) => {
+            if (!res.ok) throw new Error(`API Error: ${res.statusText}`);
+            return res.json();
+          })
+        );
 
         setProductReports(productData || []);
         setCategoryReports(categoryData || []);
         setSummary(summaryData || null);
-        setUserAll(userAllData || { users: [] });  // Set default structure for userAll
+        setUserAll(userAllData || { users: [] });
       } catch (error) {
         console.error('Error fetching data:', error);
-        router.push('/login');  // Redirect if any fetch fails
+        router.push('/login');
       } finally {
         setLoading(false);
       }
@@ -93,7 +114,6 @@ export default function Dashboard() {
     fetchData();
   }, [token, router]);
 
-  // Show loading spinner while data is being fetched
   if (loading) {
     return (
       <Layout>
@@ -111,7 +131,6 @@ export default function Dashboard() {
     );
   }
 
-  // Handle case when user data is still not available
   if (!userData) {
     return (
       <Layout>
@@ -122,7 +141,6 @@ export default function Dashboard() {
     );
   }
 
-  // Render the user data once it's fetched
   return (
     <Layout>
       <Typography variant="h4" gutterBottom>
@@ -230,12 +248,11 @@ export default function Dashboard() {
         </Grid>
       </Grid>
 
-      {/* User Data from Server */}
+      {/* User Data */}
       <Box sx={{ bgcolor: 'background.paper', minHeight: '300px', padding: 3, borderRadius: 2, boxShadow: 2, marginTop: 3 }}>
         <Typography variant="h6" gutterBottom>
           User Data from Server
         </Typography>
-
         <Paper sx={{ width: '100%', overflow: 'hidden' }}>
           <Table>
             <TableHead>
