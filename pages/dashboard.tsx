@@ -78,16 +78,16 @@ export default function Dashboard() {
 
         // Fetch reports and users
         const responses = await Promise.all([
-          fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/top-products`, {
+          fetch(`http://localhost:5000/reports/top-products`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/top-categories`, {
+          fetch(`http://localhost:5000/reports/top-categories`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/summary`, {
+          fetch(`http://localhost:5000/reports/summary`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`, {
+          fetch(`http://localhost:5000/users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
