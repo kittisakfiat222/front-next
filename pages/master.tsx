@@ -86,7 +86,7 @@ export default function ManageMasters() {
   const fetchData = async (url: string, method: string = 'GET', body: any = null) => {
     const headers: HeadersInit = {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
+      //'Authorization': `Bearer ${token}`,
     };
 
     const options: RequestInit = { method, headers };

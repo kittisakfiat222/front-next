@@ -47,7 +47,7 @@ export default function Cashier() {
     fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/allpd`, {
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        //'Authorization': `Bearer ${token}`,
       },
     })
       .then((res) => res.json())
@@ -123,7 +123,7 @@ export default function Cashier() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
+        // 'Authorization': `Bearer ${token}`,
       },
       body: JSON.stringify({ items: cart, id: userId }),
     });

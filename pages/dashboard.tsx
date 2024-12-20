@@ -6,15 +6,15 @@ import { GetServerSideProps } from 'next';
 import type { User } from '../models/user';
 import { setCookie, getCookie, deleteCookie } from '@/utils/cookie';
 
-interface DashboardProps {
-  userAll: {
-    users: User[];
-  };
-}
 
+
+
+interface DashboardProps {
+  userAll?: { users: User[] }; // ประกาศว่า userAll เป็น object ที่มี property users ซึ่งเป็น array ของ User
+}
 interface ProductReport {
-  id: number;
-  name: string;
+  id: string;
+  product: Product;  // product should be of type Product
   totalSales: number;
   totalQuantity: number;
 }
@@ -23,7 +23,15 @@ interface CategoryReport {
   id: number;
   name: string;
   totalSales: number;
+  totalQuantity :number;
 }
+
+interface Product {
+  id: string;
+  name: string;
+}
+
+
 
 interface SummaryReport {
   daily: { totalSales: number; orderCount: number };
@@ -62,16 +70,16 @@ export default function Dashboard() {
         // Fetch reports and users
         const responses = await Promise.all([
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/top-products`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { /*'Authorization': `Bearer ${token}`*/ },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/top-categories`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { /*'Authorization': `Bearer ${token}`*/ },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/reports/summary`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { /*'Authorization': `Bearer ${token}`*/ },
           }),
           fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`, {
-            headers: { 'Authorization': `Bearer ${token}` },
+            headers: { /*'Authorization': `Bearer ${token}`*/ },
           }),
         ]);
 
@@ -248,7 +256,7 @@ export default function Dashboard() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {userAll?.users.map((user , index) => (
+              {userAll?.users.map((user , index : number) => (
                 <TableRow key={index}>
                   <TableCell>{index+1}</TableCell>
                   <TableCell>{`${user.fname} ${user.lname}`}</TableCell>

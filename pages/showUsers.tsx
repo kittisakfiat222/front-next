@@ -63,7 +63,7 @@ export default function ShowUser() {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          // 'Authorization': `Bearer ${token}`,
         },
       });
   
@@ -142,7 +142,7 @@ export default function ShowUser() {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
         },
       });
 
@@ -206,7 +206,7 @@ export default function ShowUser() {
             fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`, {
               headers: {
                 'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`,
+                //'Authorization': `Bearer ${token}`,
               },
             })
               .then((res) => {

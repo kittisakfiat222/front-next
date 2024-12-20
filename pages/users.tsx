@@ -50,7 +50,7 @@ export default function Home() {
       fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/users`, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
         },
       })
         .then((res) => {

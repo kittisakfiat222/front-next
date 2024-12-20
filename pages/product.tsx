@@ -78,7 +78,7 @@ export default function ProductManagement() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/products`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error(`Error fetching products: ${response.status}`);
@@ -95,7 +95,7 @@ export default function ProductManagement() {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/categoriesPD`, {
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
         },
       });
       if (!response.ok) throw new Error(`Error fetching categories: ${response.status}`);
@@ -154,7 +154,7 @@ export default function ProductManagement() {
         method,
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify(currentProduct),
       });
@@ -182,7 +182,7 @@ export default function ProductManagement() {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          //'Authorization': `Bearer ${token}`,
         },
       });
 

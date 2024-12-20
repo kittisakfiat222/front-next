@@ -41,7 +41,7 @@ export default function ShowOrder() {
     const fetchOrders = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/orders`, {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: { /*'Authorization': `Bearer ${token}`*/ },
         });
         const data = await res.json();
 
