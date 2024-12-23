@@ -6,9 +6,6 @@ import { GetServerSideProps } from 'next';
 import type { User } from '../models/user';
 import { setCookie, getCookie, deleteCookie } from '@/utils/cookie';
 
-
-
-
 interface DashboardProps {
   userAll?: { users: User[] }; // ประกาศว่า userAll เป็น object ที่มี property users ซึ่งเป็น array ของ User
 }
@@ -31,8 +28,6 @@ interface Product {
   name: string;
 }
 
-
-
 interface SummaryReport {
   daily: { totalSales: number; orderCount: number };
   monthly: { totalSales: number; orderCount: number };
@@ -54,6 +49,21 @@ export default function Dashboard() {
     const fetchData = async () => {
       setLoading(true);
 
+      const checkJsonResponse = async (res: Response) => {
+        if (!res.ok) {
+          console.error(`API call failed with status: ${res.status}`);
+          console.error(`Response URL: ${res.url}`);
+          throw new Error(`Error fetching data: ${res.statusText}`);
+        }
+        const contentType = res.headers.get('Content-Type');
+        if (contentType && contentType.includes('application/json')) {
+          return res.json();
+        } else {
+          console.error(`Unexpected response content type: ${contentType}`);
+          throw new Error('Received non-JSON response');
+        }
+      };
+
       try {
         // Fetch protected user data
         const userRes = await fetch('/api/protected', {
@@ -62,7 +72,7 @@ export default function Dashboard() {
         });
         if (!userRes.ok) {
           console.error('Error fetching user data');
-          router.push('/login')
+          router.push('/login');
         }
         const userData = await userRes.json();
         setUserData(userData.user);
@@ -83,7 +93,9 @@ export default function Dashboard() {
           }),
         ]);
 
-        const [productData, categoryData, summaryData, userAllData] = await Promise.all(responses.map((res) => res.json()));
+        const [productData, categoryData, summaryData, userAllData] = await Promise.all(
+          responses.map((res) => checkJsonResponse(res))
+        );
 
         setProductReports(productData || []);
         setCategoryReports(categoryData || []);
@@ -241,32 +253,8 @@ export default function Dashboard() {
 
       {/* User Data from Server */}
       <Box sx={{ bgcolor: 'background.paper', minHeight: '300px', padding: 3, borderRadius: 2, boxShadow: 2, marginTop: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          User Data from Server
-        </Typography>
-
-        <Paper sx={{ width: '100%', overflow: 'hidden' }}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>Name</TableCell>
-                <TableCell>Username</TableCell>
-                <TableCell>Email</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {userAll?.users.map((user , index : number) => (
-                <TableRow key={index}>
-                  <TableCell>{index+1}</TableCell>
-                  <TableCell>{`${user.fname} ${user.lname}`}</TableCell>
-                  <TableCell>{user.username}</TableCell>
-                  <TableCell>{user.email}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
+        <Typography variant="h6">User Data</Typography>
+        <pre>{JSON.stringify(userAll, null, 2)}</pre>
       </Box>
     </Layout>
   );
