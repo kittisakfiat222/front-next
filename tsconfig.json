@@ -20,6 +20,6 @@
     "types": ["node"],
     "moduleResolution": "node"
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "server.mjs"],
   "exclude": ["node_modules"]
 }

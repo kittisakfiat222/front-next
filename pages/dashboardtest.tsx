@@ -59,11 +59,11 @@ export default function Dashboard() {
         setUserData(userData.user);
 
         // Fetch reports and users
-        const [productData, categoryData, summaryData, userAllData] = await Promise.all([
-          apiProxy('/reports/top-products', { token }),
-          apiProxy('/reports/top-categories', { token }),
-          apiProxy('/reports/summary', { token }),
-        ]);
+
+        const productData = await apiProxy('/reports/top-products', { token });
+        const categoryData = await apiProxy('/reports/top-categories', { token });
+        const summaryData = await apiProxy('/reports/summary', { token });
+    
 
         setProductReports(productData || []);
         setCategoryReports(categoryData || []);

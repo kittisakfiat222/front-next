@@ -1,11 +1,11 @@
 // utils/apiProxy.ts
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5000'; // Updated default port
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://localhost:5000'; // Updated default port
 
 interface FetchOptions extends RequestInit {
   token?: string; // Optional Authorization token
 }
 
-const apiProxy = async (endpoint: string, options: FetchOptions = {}) => {
+const apiProxy = async <T = any>(endpoint: string, options: FetchOptions = {}): Promise<T> => {
   const { token, ...fetchOptions } = options;
 
   const headers = {
@@ -21,13 +21,16 @@ const apiProxy = async (endpoint: string, options: FetchOptions = {}) => {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status} - ${response.statusText}`);
+      const errorResponse = await response.json().catch(() => null);
+      const errorMessage = errorResponse?.message || response.statusText;
+      console.error(`API Error: ${response.status} - ${errorMessage}`);
+      throw new Error(`API Error: ${response.status} - ${errorMessage}`);
     }
 
-    return response.json();
-  } catch (error) {
-    console.error('API Proxy Error:', error);
-    throw error;
+    return response.json() as Promise<T>;
+  } catch (error: any) {
+    console.error('API Proxy Error:', error.message || error);
+    throw new Error(error.message || 'Unknown API Proxy Error');
   }
 };
 
